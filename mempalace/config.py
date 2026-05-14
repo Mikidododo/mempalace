@@ -358,6 +358,26 @@ class MempalaceConfig:
         return str(self._file_config.get("embedding_device", "auto")).strip().lower()
 
     @property
+    def embedding_model(self):
+        """Embedding model identifier.
+
+        Values: ``"minilm"`` (default, ChromaDB's all-MiniLM-L6-v2 — English-only),
+        ``"embeddinggemma"`` (multilingual, 100+ languages, requires
+        ``pip install mempalace[multilingual]``). Read from env
+        ``MEMPALACE_EMBEDDING_MODEL`` first, then ``embedding_model`` in
+        ``config.json``, then ``"minilm"`` for back-compat.
+
+        Switching models on an existing palace requires re-embedding
+        (different vector space) — ChromaDB rejects reads when the persisted
+        EF name doesn't match. Run ``mempalace repair rebuild-index`` after
+        changing this value.
+        """
+        env_val = os.environ.get("MEMPALACE_EMBEDDING_MODEL")
+        if env_val:
+            return env_val.strip().lower()
+        return str(self._file_config.get("embedding_model", "minilm")).strip().lower()
+
+    @property
     def topic_tunnel_min_count(self):
         """Minimum number of overlapping confirmed topics required to create
         a cross-wing tunnel between two wings.
